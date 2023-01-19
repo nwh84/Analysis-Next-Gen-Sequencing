@@ -1,3 +1,3 @@
 # Analysis-Next-Gen-Sequencing
 
-this was added from Rstudio
+This class focuses on Illumina short read sequencing. All steps of the analysis pipeline will be explored.
