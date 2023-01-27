@@ -16,16 +16,18 @@ Find number of unique barcodes:
 egrep '^@.*' demo.fastq | egrep -o '1:N:0:.*$' | egrep -o '[ACTG].*$' | sort | uniq -c | wc -l
 ```
 output:
+```
 20
+```
 
 List them, in order from most used to least used: 
 ```{}
 egrep '^@.*' demo.fastq | egrep -o '1:N:0:.*$' | egrep -o '[ACTG].*$' | sort | uniq -c | sort -nr
 ```
 output:
-
-24260 GAGTGG  
-76 GAGTGC    
+````
+24260 GAGTGG
+76 GAGTGC 
 73 GGGTGG  
 64 GACTGG  
 59 GAGTCG  
@@ -43,7 +45,8 @@ output:
 12 AAGTGG  
 6 GAGTAG  
 6 GAGCGG  
-5 GAATGG  
+5 GAATGG
+````
 
 ### Part 2
 Copy the PDB files
@@ -65,8 +68,8 @@ done
 ```
 output:
 
-
-number of lines: 
+```{}
+number of lines:
 2983 1A3B.pdb
 number of atoms: 
 2325
@@ -152,3 +155,4 @@ SOURCE   2 ORGANISM_SCIENTIFIC: RATTUS NORVEGICUS;
 SOURCE   3 ORGANISM_COMMON: RAT;                                                
 SOURCE   6 ORGANISM_SCIENTIFIC: RATTUS NORVEGICUS;                              
 SOURCE   7 ORGANISM_COMMON: RAT;
+```
