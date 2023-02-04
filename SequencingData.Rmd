@@ -175,7 +175,7 @@ do
   cat ERR4588$i.fastq.gz >> WT.fastqc.gz
 done
 ```
-## Question 7
+### Question 7
 If you had to determine the version of the Sanger quality score encoding used in a given FASTQ file without the help of FastQC, what would you do?
 
 I would consult the ascii table to see if the Phred scores seem to be +64 or +33, given that most quality scores will be around 30 or above. The +33 version will have more quality scores with uppercase letters and the +64 version will have more quality scores with lowercase letter. 
