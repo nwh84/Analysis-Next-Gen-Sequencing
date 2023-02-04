@@ -1,5 +1,5 @@
 ---
-title: "Sequencing Data"
+title: "Exercise: Sequencing Data"
 author: "Noelle Wheeler"
 date: "2023-02-02"
 output: html_document
@@ -41,14 +41,10 @@ done < values.txt
 ls
 ```
 
-```
-1416210        demo.fastq     ERR458880.txt  ERR458883.txt  new.txt
-accession_url  ERR458878.txt  ERR458881.txt  ERR458884.txt  sequencingData.sh
-barcode.sh     ERR458879.txt  ERR458882.txt  homework1      values.txt
-```
-
 ### Question 2
 They are there multiple fastq files for the sample WT_2? What does each file represent?
+
+There are 7 fastq files for each biological replicate because each one corresponds to a different lane on a sequencing flow cell.
 
 ### Question 3
 Count the number of lines in each fastq file
@@ -82,12 +78,13 @@ for file in ERR*; do count=$(zcat $file | wc -l); count_div=$(( $count / 4 )); e
 1885330
 ```
 
+## Part II sequencing quality control and preprocessing
+### Question 1
+
 Make directories for new files
 ```{}
 mkdir SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
 ```
-## Part II sequencing quality control and preprocessing
-### Question 1
 
 Download files so I have first three technical replicates of WT and SNF2 samples
 ```{}
@@ -110,7 +107,7 @@ Pass in accession number ranges as arguments
 ```
 
 ### Question 2
-Write a for loop that will run FastQ on all of the FASTQ files
+Write a for loop that will run FastQC on all of the FASTQ files
 ```{}
 for dir in SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
 do
@@ -122,7 +119,7 @@ done
 ```
 
 ### Question 2
-Run TrimGalore on sample SNF2 biological replicate no. 1
+Run TrimGalore on sample SNF2 biological replicate no. 1. I did not change any of the defualt parameters.
 ```{}
 for file in SNF2_1/*fastq.gz
 do
@@ -130,8 +127,8 @@ do
 done
 ```
 
-Run fastQ on trimmed sample SNF2 biological replicate no. 1
 ### Question 2
+Run FastQC on trimmed sample SNF2 biological replicate no. 1
 ```{}
 for file in *trimmed.fq.gz
 do
@@ -139,11 +136,46 @@ do
 done
 ```
 
+### Question 3
+Describe one detail of the QC results that changes after TrimGalore and one result that stays the same.
+
+After TrimGalore there is a warning for Sequence Length Distribution. Some of the sequences are trimmed to be shorter than 51 bp whereas before trimming all the sequences are 51 bp. 
+The sequence duplication levels appear similar between the trimmed and non trimmed sequences in the samples that I looked at. Trimming would not change the amount of duplicated sequences unless a duplicate sequence gets removed during the trimming process. 
+
 ### Question 4
 Run MultiQC on initial FastQ results
 ```{}
 mamba activate multiqc
 multiqc SNF2_1/ SNF2_2/ SNF2_3/ WT1/ WT2/ WT3/
 ```
+Here the WT samples are highlighted in red and the SNF2 samples are highlighted in green.
+![](/Users/noelawheeler/Downloads/fastqc_sequence_counts_plot.png)
 
+### Question 5
+Based on the QC, would you be justified in combining any of the FASTQ files given that they are technical replicates?
 
+I would not combine the technical replicates because they seem to have as much variation as the biological replicates. This may be due to batch effects that would be worth exploring and understanding.
+
+### Question 6
+What commands would you use to combine several FASTQ files into one?
+
+```{}
+for i in {3..9}
+do
+  cat ERR45849$i.fastq.gz >> WT.fastqc.gz
+done
+
+for i in {00..20}
+do
+  cat ERR4585$i.fastq.gz >> SNF2.fastqc.gz
+done
+
+for i in {78..91}
+do
+  cat ERR4588$i.fastq.gz >> WT.fastqc.gz
+done
+```
+## Question 7
+If you had to determine the version of the Sanger quality score encoding used in a given FASTQ file without the help of FastQC, what would you do?
+
+I would consult the ascii table to see if the Phred scores seem to be +64 or +33, given that most quality scores will be around 30 or above. The +33 version will have more quality scores with uppercase letters and the +64 version will have more quality scores with lowercase letter. 
