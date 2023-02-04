@@ -1,0 +1,142 @@
+---
+title: "Sequencing Data"
+author: "Noelle Wheeler"
+date: "2023-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part I sequencing data
+##Question 1
+
+Download file with urls
+```{}
+cd homework
+wget -O accession_url "https://www.ebi.ac.uk/ena/portal/api/filereport?accession=PRJEB5348&result=read_run&fields=run_accession,fastq_ftp&format=tsv&download=true&limit=0"
+```
+
+Create file to hold accession IDs
+```{}
+str=ERR
+x=458878
+while [ $x -le 458884 ]
+do
+    echo $str$x >> values.txt
+    echo >> values.txt
+    x=$(( $x + 1 ))
+done
+```
+
+Download all related files and check they have downloaded
+
+```{}
+while read line
+do
+    wget -O $line.txt ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR458/$line/$line.fastq.gz
+done < values.txt 
+
+ls
+```
+
+```
+1416210        demo.fastq     ERR458880.txt  ERR458883.txt  new.txt
+accession_url  ERR458878.txt  ERR458881.txt  ERR458884.txt  sequencingData.sh
+barcode.sh     ERR458879.txt  ERR458882.txt  homework1      values.txt
+```
+
+##Question 2
+They are there multiple fastq files for the sample WT_2? What does each file represent?
+
+##Question 3
+Count the number of lines in each fastq file
+```{}
+for file in ERR*; do zcat $file | wc -l; done
+```
+
+```
+5870276
+5800048
+5766276
+5286992
+4527136
+4562752
+5846584
+```
+
+Count the number of reads in each fastq file
+```{}
+for file in ERR*; do count=$(zcat $file | wc -l); count_div=$(( $count / 4 )); echo $count_div; done
+```
+
+```
+1093957
+1078049
+1066501
+985619
+846040
+851243
+1093200
+1885330
+```
+
+Make directories for new files
+```{}
+mkdir SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
+```
+
+Download files so I have first three technical replicates of WT and SNF2 samples
+```{}
+#! bin/bash
+
+str=ERR
+x=$1
+
+while [ $x -le $2 ]
+do
+    wget -O $str$x.txt ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR458/$str$x/$str$x.fastq.gz
+    x=$(( $x + 1 ))
+done
+```
+
+Pass in accession number ranges as arguments
+```{}
+./download.sh 458493 458520
+./download.sh 458885 458891
+```
+
+Write a for loop that will run FastQ on all of the FASTQ files
+```{}
+for dir in SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
+do
+    for file in $dir/*
+    do
+        fastqc $file --extract
+    done
+done
+```
+
+Run TrimGalore on sample SNF2 biological replicate no. 1
+```{}
+for file in SNF2_1/*fastq.gz
+do
+    trim_galore --illumina $file
+done
+```
+Run fastQ on trimmed sample SNF2 biological replicate no. 1
+```{}
+for file in *trimmed.fq.gz
+do
+    fastqc $file --extract
+done
+```
+
+Run MultiQC on initial FastQ results
+```{}
+mamba activate multiqc
+multiqc SNF2_1/ SNF2_2/ SNF2_3/ WT1/ WT2/ WT3/
+```
+
+
