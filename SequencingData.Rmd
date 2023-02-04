@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Part I sequencing data
-##Question 1
+### Question 1
 
 Download file with urls
 ```{}
@@ -47,10 +47,10 @@ accession_url  ERR458878.txt  ERR458881.txt  ERR458884.txt  sequencingData.sh
 barcode.sh     ERR458879.txt  ERR458882.txt  homework1      values.txt
 ```
 
-##Question 2
+### Question 2
 They are there multiple fastq files for the sample WT_2? What does each file represent?
 
-##Question 3
+### Question 3
 Count the number of lines in each fastq file
 ```{}
 for file in ERR*; do zcat $file | wc -l; done
@@ -86,6 +86,8 @@ Make directories for new files
 ```{}
 mkdir SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
 ```
+## Part II sequencing quality control and preprocessing
+### Question 1
 
 Download files so I have first three technical replicates of WT and SNF2 samples
 ```{}
@@ -107,6 +109,7 @@ Pass in accession number ranges as arguments
 ./download.sh 458885 458891
 ```
 
+### Question 2
 Write a for loop that will run FastQ on all of the FASTQ files
 ```{}
 for dir in SNF2_1 SNF2_2 SNF2_3 WT1 WT2 WT3
@@ -118,6 +121,7 @@ do
 done
 ```
 
+### Question 2
 Run TrimGalore on sample SNF2 biological replicate no. 1
 ```{}
 for file in SNF2_1/*fastq.gz
@@ -125,7 +129,9 @@ do
     trim_galore --illumina $file
 done
 ```
+
 Run fastQ on trimmed sample SNF2 biological replicate no. 1
+### Question 2
 ```{}
 for file in *trimmed.fq.gz
 do
@@ -133,6 +139,7 @@ do
 done
 ```
 
+### Question 4
 Run MultiQC on initial FastQ results
 ```{}
 mamba activate multiqc
