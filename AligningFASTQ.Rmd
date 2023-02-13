@@ -1,0 +1,134 @@
+---
+title: "Aligning FASTQ Reads"
+author: "Noelle Wheeler"
+date: "2023-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Question 1
+Run BWA and STAR on SNF2 biological replicate 1. ID = ERR458500 
+
+Prepare for alignments, copy reference genome indices.
+```{}
+cp -r  ~luce/angsd/referenceGenomes/sacCer3_STARindex .
+cp -r  ~luce/angsd/referenceGenomes/sacCer3_BWAindex .
+```
+
+Script to align a specified sample
+```{}
+#!/bin/bash -l
+#SBATCH --partition=angsd_class
+#SBATCH --nodes=1#SBATCH --ntasks=1
+#SBATCH --job-name="alignments"
+#SBATCH --time=24:0:00 # HH/MM/SS#SBATCH --mem=1G # memory requested, units available: K,M,G,T
+#SBATCH --mail-user=naw4005@med.cornell.edu
+#SBATCH --mail-type=ALL
+#SBATCH --requeue
+
+# Check that we have our command line arguments
+arg_count=$#
+if [ $arg_count -lt 3 ]; then
+  echo "Not enough command line arguments. Exiting ..."
+  echo "Usage: alignment.sh <STAR_alignment_dir > <BWA_alignment_dir > <fastq_file>"
+  exit
+fi
+
+mamba activate angsd
+
+# make alignment directories 
+STARalignments=$1
+BWAalignments=$2
+sample=$3
+
+mkdir ${STARalignments}
+mkdir ${BWAalignments}
+
+# run STAR alignments
+STAR --runMode alignReads \
+    --runThreadN 1 \
+    --genomeDir sacCer3_STARindex \
+    --readFilesIn ${sample}.fastq.gz \
+    --readFilesCommand zcat \
+    --outFileNamePrefix ${STARalignments}/${sample}. \
+    --outSAMtype BAM SortedByCoordinate
+
+# run BWA alignments
+bwa mem sacCer3_BWAindex/sacCer3 ${sample}.fastq.gz > ${BWAalignments}/${sample}.bwa.sam
+
+# convert SAM file to BAM file
+samtools view -b ${BWAalignments}/${sample}.bwa.sam -o ${BWAalignments}/${sample}.bwa.bam
+rm ${BWAalignments}/${sample}.bwa.sam
+
+# sort BAM files
+samtools sort ${BWAalignments}/${sample}.bwa.bam -o ${BWAalignments}/${sample}.bwa.sorted.bam
+
+# index sorted files
+samtools index ${STARalignments}/${sample}.Aligned.sortedByCoord.out.bam
+samtools index ${BWAalignments}/${sample}.bwa.sorted.bam
+```
+
+To run script (you may change directory/sample names):
+```{}
+sbatch alignment.sh STARalignments BWAalignments ERR458500
+```
+### Question 2
+
+Subset the aligned reads to select only those that map to chromosome I.
+
+```{}
+samtools view -b BWAalignments/ERR458500.bwa.sorted.bam chrI -o BWAalignments/ERR458500.bwa.chrI.bam
+
+samtools view -b STARalignments/ERR458500.Aligned.sortedByCoord.out.bam chrI -o STARalignments/ERR458500.Aligned.sortedByCoord.chrI.bam
+```
+
+### Question 3
+Compare the output from BWA and STAR, and summarize any results or differences.
+
+STAR BAM file has 2005001 total lines which the BWA BAM file has 1885353 total lines.
+Is is probably because STAR is able to align reads that map across introns while
+BWA is not. 
+STAR BAM files have NH:, HI:, AS:, nM: sections to describe read mappings. 
+NH = num of reported alignments, HI = hit iteration in the file, AS = alignment score,
+nM = num mismatches per paired alignment.
+
+BWA BAM files have NM:, MD:, AS:, XS:, XA: sections to describe read mappings. 
+NM = edit distance to reference, MD = position of mismatches, AS = alignment score, XS = sub-optimal alignment score, XA = alternative hits.
+Some samples, in both STAR and BWA, are missing certain categories.
+
+### Question 4
+Run bamqc on your BAM files.
+```{}
+/softlib/apps/EL7/BamQC/bin/bamqc BWAalignments/ERR458500.bwa.sorted.bam STARalignments/ERR458500.Aligned.sortedByCoord.out.bam
+```
+Differences:
+The percent of sequences unmapped from BWA was 2.198% while the percent of sequences unmapped from STAR was 0%.
+The percent of SNPs from BWA was .5% while the percent of SNPs from STAR was 0%.
+In BWA, the indel frequencies show a spike in the beginning of the reads, but we do not see this for STAR.
+
+### Question 5
+Explain the difference between alignment score and mapping quality in SAM/BAM files. How does the interpretation of the mapping quality field differ between STAR and BWA?
+
+The alignment score tells you how similar a read is to the reference sequence due to the number of mismatches. The mapping quality is the probability that the read is correctly mapped to the position in question. For STAR the MAPQ values are 0, 1, 3, or 255 where 255 is a uniquely mapped read. For BWA the MAPQ values are more variable. 60 is the highest, indicating a uniquely mapped read. 
+
+### Question 6
+What is the difference between a multi-mapping read and a split read? How did BWA handle the mapping of a split read?
+
+A multimapping read is a read that maps to multiple positions on the reference sequence. A split read is a read where a portion of it maps to a contiguous section on the reference genome and a portion of it maps to a different, non-adjacent section on the reference genome. BWA handled a split read by soft trimming the section that would have mapped to a different location. 
+
+### Question 7
+How can you remove the unmapped reads from the BWA output?
+
+To find unampped reads in BAM files you can use the command:
+```{}
+samtools view -F 4 BWAalignments/ERR458500.bwa.sorted.bam
+```
+This will output all the reads that do NOT have the decimal 4 in the Flag column (meaning the read is mapped). The -F does the opposite of the -f flag. -f takes all samples that do have 4 in their decimal whereas -F takes all the samples that do not. From this you can store the output in a new file that would hold all the mapped reads. For example:
+```{}
+samtools view -F 4 BWAalignments/ERR458500.bwa.sorted.bam > BWAalignments/ERR458500.bwa.mapped.bam
+```
+
+
