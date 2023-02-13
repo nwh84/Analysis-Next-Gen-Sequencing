@@ -39,11 +39,11 @@ fi
 
 mamba activate angsd
 
-# make alignment directories 
 STARalignments=$1
 BWAalignments=$2
 sample=$3
 
+# make alignment directories 
 mkdir ${STARalignments}
 mkdir ${BWAalignments}
 
