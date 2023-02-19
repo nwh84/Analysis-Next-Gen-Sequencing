@@ -1,0 +1,123 @@
+---
+title: "Creating figures with ggplot"
+author: "Noelle Wheeler"
+date: "2023-02-18"
+output: html_document
+---
+
+### Question 1
+Copy fastqc_data.txt files from two wildtype and two SNF2 mutants.
+```{}
+cd Documents
+
+scp naw4005@aphrodite.med.cornell.edu:/home/naw4005/homework/homework2/SNF2_1/ERR458500_fastqc/fastqc_data.txt SNF2_1.ERR458500fastqc_data.txt
+
+scp naw4005@aphrodite.med.cornell.edu:/home/naw4005/homework/homework2/SNF2_2/ERR458507_fastqc/fastqc_data.txt SNF2_2.ERR458507fastqc_data.txt
+
+scp naw4005@aphrodite.med.cornell.edu:/home/naw4005/homework/homework2/WT1/ERR458493_fastqc/fastqc_data.txt WT1.ERR458493fastqc_data.txt
+
+scp naw4005@aphrodite.med.cornell.edu:/home/naw4005/homework/homework2/WT2/ERR458878_fastqc/fastqc_data.txt WT2.ERR458878fastqc_data.txt
+```
+
+### Question 2
+Load the parse_fastqc function (shown below) into your workspace and use it to extract the values of FastQC’s diagnostic “Per base sequence quality” from a single fastqc_data.txt file into an Robject.
+
+Load function into workspace
+```{r}
+library(magrittr)
+parse_fastqc <- function(file, test = "Per base sequence quality") {
+
+  # generate the string that will be used for the file parsing
+  syscommand <- paste0("sed -n '/", test, "/,/END_MODULE/p' ", file, " | grep -v '^>>'")
+
+  # use the fread command, which can interpret UNIX commands on the fly to
+  # read in the correct portion of the FastQC result
+  fastqc_data <- data.table::fread( cmd = syscommand, header = TRUE) %>% as.data.frame
+  
+  return(fastqc_data)
+}
+```
+Extract the values of FastQC’s diagnostic “Per base sequence quality” from a single fastqc_data.txt file into an Robject.
+```{r}
+fastqcWT2.ERR458878 <- parse_fastqc(file = 
+"/Users/noelawheeler/Documents/WT2.ERR458878fastqc_data.txt")
+```
+
+### Question 3
+Explain the logic of the function's sed command.
+
+The sed command reads the input file, and performs the list of commands to the input. The paste0 function in R creates the command "sed -n '/Per base sequence quality/,/END_MODULE/p' input_file | grep -v '^>>'". The -n suppresses the output so that each line of of input is not echoed to the standard output after all the commands have been applied to it. The '/Per base sequence quality/,/END_MODULE/p' is the address of the sed command. This is a regular expression so that only the section between '/Per base sequence quality/ and /END_MODULE/ is selected. The p at the end denotes to write the pattern space to standard output. The output of the sed command is then piped to the grep command to select every line that does not start with '>>'.
+
+### Question 4
+Modify the function, so that the resulting data frame also contains a user-specified sample name (e.g., “WT_1_ERR458493”), i.e., the function should get at least one more argument.
+```{r}
+parse_fastqc <- function(file, path, samplename, test = "Per base sequence quality") {
+
+  # generate the string that will be used for the file parsing
+  syscommand <- paste0("sed -n '/", test, "/,/END_MODULE/p' ", path, samplename, file, " | grep -v '^>>'")
+
+  # use the fread command, which can interpret UNIX commands on the fly to
+  # read in the correct portion of the FastQC result
+  fastqc_data <- data.table::fread( cmd = syscommand, header = TRUE) %>% as.data.frame
+  
+  return(fastqc_data)
+}
+```
+
+### Use your updated function to read in the FastQC results of the fastqc_data.txt files. Make sure to keep track of the sample name in the new Robjects you’re creating.
+```{r}
+for (sn in c("SNF2_1.ERR458500", "SNF2_2.ERR458507", "WT1.ERR458493")){
+  # name new data frame
+  new_df <- paste0("fastqc", sn)
+  # read in correct portion of fastqc to dataframe 
+  assign(new_df, parse_fastqc(file = "fastqc_data.txt", path = 
+  "/Users/noelawheeler/Documents/", samplename = sn))
+}
+```
+
+### Question 6
+Combine all these data.frames into one.
+```{r}
+'all_samples' <- rbind(fastqcSNF2_1.ERR458500, fastqcSNF2_2.ERR458507, fastqcWT1.ERR458493, fastqcWT2.ERR458878)
+```
+
+### Question 7
+Make a ggplot2-based plot using the combined data frame. Try to mimic the basic features of the example plot below, but feel free to change the color palette, remove the grey background and other details.
+```{r}
+# create new column with runid
+all_samples$runid <- NA
+all_samples$runid[1:51] <- "ERR458500"
+all_samples$runid[52:102] <- "ERR458507"
+all_samples$runid[103:153] <- "ERR458493"
+all_samples$runid[154:204] <- "ERR458878"
+# create new column with sample type
+all_samples$SampleType <- NA
+all_samples$SampleType[1:102] <- "SNF2"
+all_samples$SampleType[103:204] <- "WT"
+# rename column #Base to Base
+colnames(all_samples)[1] ="Base"
+```
+
+
+```{r}
+# plot data
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+p <- ggplot(all_samples, aes(x = Base, y = Mean)) + geom_point(aes(color = runid), size = 1) + ylim(c(0,40))
+
+p1 <- p + scale_color_manual(values=c("#F8766D", "#00BFC4", "#C77CFF", "#7CAE00"))
+p2 <- p1 + facet_grid(. ~ SampleType)
+p2
+```
+
+### Question 8
+Document exact versions of packages used to run my code.
+```{r}
+sessionInfo()
+```
+
+
+
+
+
