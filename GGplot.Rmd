@@ -64,7 +64,7 @@ parse_fastqc <- function(file, path, samplename, test = "Per base sequence quali
 }
 ```
 
-### Use your updated function to read in the FastQC results of the fastqc_data.txt files. Make sure to keep track of the sample name in the new Robjects you’re creating.
+Use your updated function to read in the FastQC results of the fastqc_data.txt files. Make sure to keep track of the sample name in the new Robjects you’re creating.
 ```{r}
 for (sn in c("SNF2_1.ERR458500", "SNF2_2.ERR458507", "WT1.ERR458493")){
   # name new data frame
@@ -78,7 +78,7 @@ for (sn in c("SNF2_1.ERR458500", "SNF2_2.ERR458507", "WT1.ERR458493")){
 ### Question 6
 Combine all these data.frames into one.
 ```{r}
-'all_samples' <- rbind(fastqcSNF2_1.ERR458500, fastqcSNF2_2.ERR458507, fastqcWT1.ERR458493, fastqcWT2.ERR458878)
+all_samples <- rbind(fastqcSNF2_1.ERR458500, fastqcSNF2_2.ERR458507, fastqcWT1.ERR458493, fastqcWT2.ERR458878)
 ```
 
 ### Question 7

@@ -431,11 +431,9 @@ should get at least one more argument.</p>
   
   return(fastqc_data)
 }</code></pre>
-</div>
-<div id="use-your-updated-function-to-read-in-the-fastqc-results-of-the-fastqc_data.txt-files.-make-sure-to-keep-track-of-the-sample-name-in-the-new-robjects-youre-creating." class="section level3">
-<h3>Use your updated function to read in the FastQC results of the
+<p>Use your updated function to read in the FastQC results of the
 fastqc_data.txt files. Make sure to keep track of the sample name in the
-new Robjects you’re creating.</h3>
+new Robjects you’re creating.</p>
 <pre class="r"><code>for (sn in c(&quot;SNF2_1.ERR458500&quot;, &quot;SNF2_2.ERR458507&quot;, &quot;WT1.ERR458493&quot;)){
   # name new data frame
   new_df &lt;- paste0(&quot;fastqc&quot;, sn)
@@ -447,7 +445,7 @@ new Robjects you’re creating.</h3>
 <div id="question-6" class="section level3">
 <h3>Question 6</h3>
 <p>Combine all these data.frames into one.</p>
-<pre class="r"><code>&#39;all_samples&#39; &lt;- rbind(fastqcSNF2_1.ERR458500, fastqcSNF2_2.ERR458507, fastqcWT1.ERR458493, fastqcWT2.ERR458878)</code></pre>
+<pre class="r"><code>all_samples &lt;- rbind(fastqcSNF2_1.ERR458500, fastqcSNF2_2.ERR458507, fastqcWT1.ERR458493, fastqcWT2.ERR458878)</code></pre>
 </div>
 <div id="question-7" class="section level3">
 <h3>Question 7</h3>
