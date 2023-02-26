@@ -197,8 +197,8 @@ STAR --runMode alignReads \
  --readFilesCommand zcat \
  --outFileNamePrefix ${out_dir_prefix} \
  --outSAMtype BAM SortedByCoordinate \
- --alignIntronMax 2700000 \
- --alignIntronMin 3 \
+ --alignIntronMax 1240120 \
+ --alignIntronMin 1 \
  --soloStrand forward
 ```
 Run alignment
@@ -207,9 +207,8 @@ sbatch align.sh "/athena/angsd/scratch/naw4005/hg38_ind" "/athena/angsd/scratch/
 ```
 Parameters changed: 
 I added both reads in separated by a space because these are paired end reads.
-I chose for outSAMtype to be a BAM file sorted by coordinate.
-I changed alignIntronMax parameter to be 2700000 because the longest intron in the human genome is 2.7 million bp long.
-I changed alignIntronMin parameters to be 3. The default is 20, but I wanted to include introns smaller than 10 bp.
+I changed alignIntronMax parameter to be 1240120 because this is the longest intron listed in the hg38 genome according to the UCSC table browser.
+I changed alignIntronMin parameters to be 1 since this is the shortest intron listed in the hg38 genome in the UCSC table browser.
 I changed soloStrand to be forward since the library prep is a stranded protocol where the strand that is read is only in the forward direction of the original mRNA strand.
 I chose the outSAMtype to be be a BAM file that is sorted by coordinate because BAM files are compressed and because the sorting makes it easier to work with after alignment. 
 
