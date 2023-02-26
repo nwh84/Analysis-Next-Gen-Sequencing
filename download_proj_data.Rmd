@@ -225,5 +225,18 @@ samtools stats /athena/angsd/scratch/naw4005/alignments/SRR8367773.Aligned.sorte
 The flagstats file shows that 65005846 reads passed QC and 0 reads failed QC. It also shows that 39421296 QC-passed reads were properly paired 0 QC-failed reads were properly paired. There were 0 singletons and 0 reads with mate mapped to a different chromosome. 
 It seems that alignment passed the necessary QC checks.  
 
+Run multiQC to visualize QC 
+```{}
+mamba activate multiqc
+multiqc -n SRR8367773.multiqc /athena/angsd/scratch/naw4005/
+```
+| Sample Name | % Aligned | M Aligned | % Dups | % GC | M Seqs |
+|:-----------:|:---------:|:---------:|:------:|:----:|:------:|
+|   SRR8367773|  79.8%.   |    16.2   |        |      |        |
+|SRR8367773_1 |           |           |   5.6% |  46% | 20.3   |
+|SRR8367773_2 |           |           | 6.2%   |  47% |  20.3  |
+
+![](/Users/noelawheeler/Desktop/Analysis of next gen seq data/star_alignment_plot.png)
+
 
 
