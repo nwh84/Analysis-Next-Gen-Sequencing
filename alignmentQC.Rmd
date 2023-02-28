@@ -1,0 +1,55 @@
+---
+title: "Alignment QC"
+author: "Noelle Wheeler"
+date: "2023-02-26"
+output: html_document
+---
+### 1. Which problem of mRNA-sequencing can be detected with FastQC? 
+- rRNA contamination\
+Yes, rRNA contamination can be detected using FastQC. The GC distribution is useful for seeing if there are any over-represented sequences which could be due to rRNA (or other) contamination. The overrepresented sequences section may show if there is rRNA contamination. The overrepresented sequences section also could help distinguish between adapter and rRNA contamination. The adapter content section might distinguish between contamination types although it is possible that fastQC did not check for the type of adapter used in the given experiment.
+- mRNA degradation\
+Yes, mRNA can be detected using the sequence length distribution. This shows if any sequences are shorter (or longer) than the read length. 
+- genomic DNA contamination\
+It is more difficult to detect Genomic DNA contamination from fastQC. It may be notable if there are strange patterns in the sequence length distribution.
+The GC content graph may also be useful for determining if there is gDNA contamination. Any spikes in the graph would be an indicator of contamination but we would not be able to determine if the source is gDNA just from the graph. gDNA might also show up in the overrepresented sequences section.
+
+### 2a. Generate plots for assessing the read distribution across exons/introns
+```{}
+$ mamba activate qorts
+$ qorts QC \
+--singleEnded \
+--generatePdfReport \
+/home/naw4005/homework/homework3/STARalignments/ERR458500.Aligned.sortedByCoord.out.bam \
+/home/luce/angsd/referenceGenomes/sacCer3.sgd.gtf \
+/home/naw4005/qort_out
+```
+a. Read distribution across exons/introns
+![](/Users/noelawheeler/Desktop/Screen Shot 2023-02-28 at 9.46.26 AM.png)
+
+b. Average gene body coverage
+![](/Users/noelawheeler/Desktop/Screen Shot 2023-02-28 at 9.44.02 AM.png)
+### 3. Why might a 3’ bias in the gene coverage plot be evidence of RNA degradation?
+RNA would typically degrade starting at the 5' end. This is because mRNA molecules have a 5' cap and if this is removed then the 5' end is vulnerable to degradation. The 3' end has a poly-a tail which would be more resistant to degradation. 
+```{r}
+# given code
+library(ggplot2); theme_set(theme_bw(base_size = 16)) # for making plots
+library(magrittr) # for "pipe"-like coding in R
+folder <- "/Users/noelawheeler/Downloads/"
+readcounts <- read.table(paste0(folder, "gierlinksi_fc.txt"), header = TRUE)
+str(readcounts)
+orig_names <- names(readcounts)
+names(readcounts) <- gsub(".*(WT|SNF2)(_[0-9]+).*", "\\1\\2", orig_names)
+
+row.names(readcounts) <- make.names(readcounts$Geneid)
+readcounts <- readcounts[ , -c(1:6)]
+sample_info <- data.frame(condition = gsub("_[0-9]+", "", names(readcounts)),
+row.names = names(readcounts) )
+DESeq.ds <- DESeqDataSetFromMatrix(countData = as.matrix(readcounts),
+colData = sample_info, design = ~ condition)
+colSums(counts(DESeq.ds)) %>% barplot
+# remove genes with no reads
+keep_genes <- rowSums(counts(DESeq.ds)) > 0
+DESeq.ds <- DESeq.ds[ keep_genes, ]
+dim(DESeq.ds)
+```
+
