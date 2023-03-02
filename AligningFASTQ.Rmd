@@ -24,7 +24,8 @@ Script to align a specified sample
 #SBATCH --partition=angsd_class
 #SBATCH --nodes=1#SBATCH --ntasks=1
 #SBATCH --job-name="alignments"
-#SBATCH --time=24:0:00 # HH/MM/SS#SBATCH --mem=1G # memory requested, units available: K,M,G,T
+#SBATCH --time=24:0:00 # HH/MM/SS
+#SBATCH --mem=1G # memory requested, units available: K,M,G,T
 #SBATCH --mail-user=naw4005@med.cornell.edu
 #SBATCH --mail-type=ALL
 #SBATCH --requeue

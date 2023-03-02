@@ -104,7 +104,7 @@ colnames(all_samples)[1] ="Base"
 library(tidyverse)
 library(ggplot2)
 library(patchwork)
-p <- ggplot(all_samples, aes(x = Base, y = Mean)) + geom_point(aes(color = runid), size = 1) + ylim(c(0,40))
+p <- ggplot(readcounts_gene, aes(class)) + geom_point(aes(color = runid), size = 1) + ylim(c(0,40))
 
 p1 <- p + scale_color_manual(values=c("#F8766D", "#00BFC4", "#C77CFF", "#7CAE00"))
 p2 <- p1 + facet_grid(. ~ SampleType)
