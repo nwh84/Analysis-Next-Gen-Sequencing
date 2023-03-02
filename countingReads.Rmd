@@ -1,0 +1,83 @@
+---
+title: "Counting reads"
+author: "Noelle Wheeler"
+date: "2023-02-27"
+output: html_document
+---
+
+#### 1. Use feature counts to count the number of reads that overlap with every exon. 
+
+```{}
+$ mkdir gene_counts
+$ featureCounts -a /home/luce/angsd/referenceGenomes/sacCer3.sgd.gtf -o /athena/angsd/scratch/naw4005/gene_counts/gierlinksi_fc_exon /home/luce/angsd/gierlinski/alignments/SNF2_1.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/SNF2_2.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/SNF2_3.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/SNF2_4.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/SNF2_5.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/WT_1.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/WT_2.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/WT_3.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/WT_4.Aligned.sortedByCoord.out.bam
+/home/luce/angsd/gierlinski/alignments/WT_5.Aligned.sortedByCoord.out.bam
+-f --tmpDir /athena/angsd/scratch/naw4005
+```
+The -t parameter specifies the feature type(s) in a GTF annotation. The default is 'exon' so I kept the default value since I would like the count the number of reads that overlap with every exon. I added the -f parameter so that it would count reads for exons rather than genes. The default value is gtf, so I kept the default value. I also set the -tmpDir parameter to be my scratch directory because this is where the temporary directory is stored. 
+
+#### 2. Generate a bar plot that displays the numbers of assigned and unassigned reads for either featureCounts run. 
+```{r}
+library(dplyr)
+library(tidyr)
+folder <- "/Users/noelawheeler/Desktop/Analysis_next_gen_data/counting_reads/"
+readcounts_gene <- read.table(paste0(folder, "gierlinksi_fc.summary"), header = TRUE)
+readcounts_exon <- read.table(paste0(folder, "gierlinksi_fc_exon.summary"), header = TRUE)
+# take only non-zero rows
+subset_readcounts_gene <- readcounts_gene[readcounts_gene$Status %in% c("Assigned", "Unassigned_Ambiguity", "Unassigned_MultiMapping", "Unassigned_NoFeatures"), ]
+subset_readcounts_exon <- readcounts_exon[readcounts_exon$Status %in% c("Assigned", "Unassigned_Ambiguity", "Unassigned_MultiMapping", "Unassigned_NoFeatures"), ]
+
+# change column names in exon dataset
+orig_names <- colnames(subset_readcounts_exon)
+names(subset_readcounts_exon) <- gsub(".*(WT|SNF2)(_[0-9]+).*", "\\1\\2", orig_names)
+
+# change column names in gene dataset
+orig_names <- colnames(subset_readcounts_gene)
+names(subset_readcounts_gene) <- gsub(".*(WT|SNF2)(_[0-9]+).*", "\\1\\2", orig_names)
+
+# make datasets long
+df_long_gene <- pivot_longer(subset_readcounts_gene, cols = c("SNF2_1", "SNF2_2","SNF2_3", "SNF2_4","SNF2_5","WT_1","WT_2", "WT_3","WT_4","WT_5"), names_to = "Type", values_to = "Count")
+df_long_exon <- pivot_longer(subset_readcounts_exon, cols = c("SNF2_1", "SNF2_2","SNF2_3", "SNF2_4","SNF2_5","WT_1","WT_2", "WT_3","WT_4","WT_5"), names_to = "Type", values_to = "Count")
+```
+plot results
+```{r}
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+exon <- ggplot(df_long_exon, aes(x = Type, y = Count, fill = Status)) +
+  geom_bar(stat = "identity", position = position_dodge(width = .9)) +
+  scale_fill_hue(name = "Variable") +
+  labs(title="exon_count",x="", y="") +
+  theme_classic() + coord_flip()
+
+gene <- ggplot(df_long_gene, aes(x = Type, y = Count, fill = Status)) +
+  geom_bar(stat = "identity", position = position_dodge(width = .9)) +
+  scale_fill_hue(name = "Variable") +
+  labs(title="gene_count",x="", y="") +
+  theme_classic() + coord_flip()
+(gene/exon)
+```
+
+These plots show very similar results. One difference is that exon_count shows slightly higher unassigned_ambiguity values than gene_count, on average. Another difference is that in most samples the exon_count has lower counts for assigned mapping, however this difference is very small. 
+
+#### 4. Download an annotation (GTF) file for any one mammalian model organism. Determine the different types of loci that are annotated within that file and how many times each type is present in that file
+```{}
+# download c. elegans gtf file
+$ wget https://hgdownload.soe.ucsc.edu/goldenPath/ce11/bigZips/genes/ce11.ensGene.gtf.gz
+$ zcat ce11.ensGene.gtf.gz | awk '{print $3}'| sort | uniq -c
+```
+ 28213 3UTR\
+  31088 5UTR\
+ 225595 CDS\
+ 273640 exon\
+  33575 start_codon\
+  33595 stop_codon\
+  61451 transcript\
+
