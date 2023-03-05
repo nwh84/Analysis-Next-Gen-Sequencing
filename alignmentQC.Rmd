@@ -23,10 +23,10 @@ $ qorts QC \
 /home/naw4005/qort_out
 ```
 a. Read distribution across exons/introns
-![](/Users/noelawheeler/Desktop/Screen Shot 2023-02-28 at 9.46.26 AM.png)
+![](/Users/noelawheeler/Desktop/Analysis of next gen seq data/Screen Shot 2023-02-28 at 9.46.26 AM.png)
 
 b. Average gene body coverage
-![](/Users/noelawheeler/Desktop/Screen Shot 2023-02-28 at 9.44.02 AM.png)
+![](/Users/noelawheeler/Desktop/Analysis of next gen seq data/Screen Shot 2023-02-28 at 9.44.02 AM.png)
 
 ### 3. Why might a 3’ bias in the gene coverage plot be evidence of RNA degradation?
 RNA would typically degrade starting at the 5' end. This is because mRNA molecules have a 5' cap and if this is removed then the 5' end is vulnerable to degradation. The 3' end has a poly-a tail which would be more resistant to degradation since it is longer. 
