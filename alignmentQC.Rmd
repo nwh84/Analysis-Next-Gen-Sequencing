@@ -8,10 +8,9 @@ output: html_document
 - rRNA contamination\
 Yes, rRNA contamination can be detected using FastQC. The GC distribution is useful for seeing if there are any over-represented sequences which could be due to rRNA (or other) contamination. The overrepresented sequences section may show if there is rRNA contamination. The overrepresented sequences section also could help distinguish between adapter and rRNA contamination. The adapter content section might distinguish between contamination types although it is possible that fastQC did not check for the type of adapter used in the given experiment.
 - mRNA degradation\
-Yes, mRNA can be detected using the sequence length distribution. This shows if any sequences are shorter (or longer) than the read length. 
-- genomic DNA contamination\
-It is more difficult to detect Genomic DNA contamination from fastQC. It may be notable if there are strange patterns in the sequence length distribution.
-The GC content graph may also be useful for determining if there is gDNA contamination. Any spikes in the graph would be an indicator of contamination but we would not be able to determine if the source is gDNA just from the graph. gDNA might also show up in the overrepresented sequences section.
+No, you cannot detect mRNA degradation from FastQC files. mRNA degradation would be apparent post-alignment if we see any 3'/5' bias.\
+- genomic DNA\
+It is difficult to detect genomic DNA from FastQC files. For this we would need post-alignment statistics. If we have a high level of non-exonic regions, especially if our library prep was poly-A enrichment, then this could indicate genomic DNA contamination. 
 
 ###  2. Generate plots for assessing the read distribution across exons/introns and average gene body coverage
 ```{}
