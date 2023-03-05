@@ -27,7 +27,7 @@ The -t parameter specifies the feature type(s) in a GTF annotation. The default 
 ```{r}
 library(dplyr)
 library(tidyr)
-folder <- "/Users/noelawheeler/Desktop/Analysis_next_gen_data/counting_reads/"
+folder <- "/Users/noelawheeler/Desktop/Analysis of next gen seq data/Analysis-Next-Gen-Sequencing/counting_reads/"
 readcounts_gene <- read.table(paste0(folder, "gierlinksi_fc.summary"), header = TRUE)
 readcounts_exon <- read.table(paste0(folder, "gierlinksi_fc_exon.summary"), header = TRUE)
 # take only non-zero rows
