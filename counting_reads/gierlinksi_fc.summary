@@ -1,0 +1,12 @@
+Status	alignments/SNF2_1.Aligned.sortedByCoord.out.bam	alignments/SNF2_2.Aligned.sortedByCoord.out.bam	alignments/SNF2_3.Aligned.sortedByCoord.out.bam	alignments/SNF2_4.Aligned.sortedByCoord.out.bam	alignments/SNF2_5.Aligned.sortedByCoord.out.bam	alignments/WT_1.Aligned.sortedByCoord.out.bam	alignments/WT_2.Aligned.sortedByCoord.out.bam	alignments/WT_3.Aligned.sortedByCoord.out.bam	alignments/WT_4.Aligned.sortedByCoord.out.bam	alignments/WT_5.Aligned.sortedByCoord.out.bam
+Assigned	9522311	8030246	8104662	9937548	6391579	5395964	7213769	5896868	9495577	7283966
+Unassigned_Ambiguity	586212	527417	545028	612126	427388	386615	474577	393976	666676	499185
+Unassigned_MultiMapping	2030273	1859214	1982515	2192083	2820557	1560557	1921298	2001796	2621076	2388796
+Unassigned_NoFeatures	747577	459138	493569	750392	433388	233048	518306	449948	593948	492507
+Unassigned_Unmapped	0	0	0	0	0	0	0	0	0	0
+Unassigned_MappingQuality	0	0	0	0	0	0	0	0	0	0
+Unassigned_FragementLength	0	0	0	0	0	0	0	0	0	0
+Unassigned_Chimera	0	0	0	0	0	0	0	0	0	0
+Unassigned_Secondary	0	0	0	0	0	0	0	0	0	0
+Unassigned_Nonjunction	0	0	0	0	0	0	0	0	0	0
+Unassigned_Duplicate	0	0	0	0	0	0	0	0	0	0
