@@ -1,0 +1,70 @@
+---
+title: "Visualizing Alignments in IGV"
+author: "Noelle Wheeler"
+date: "2023-03-14"
+output: html_document
+---
+My reference genome is hg38, downloaded from the UCSC genome browser. 
+
+#### 3. Genomic coordinates of gene ACTB = chr7:5,525,148-5,532,601 for hg38. 
+
+#### 4. Use the previous genomic coordinates to filter one of your project BAM alignments to only this region. 
+```{}
+cd /athena/angsd/scratch/naw4005/alignments/
+samtools view -b SRR8367773.Aligned.sortedByCoord.out.bam chr7:5525148-5532601 > SRR8367773.actb.bam
+samtools index SRR8367773.actb.bam
+```
+
+#### 5. Download both the BAM and BAI files you have generated to your local computer.
+```{}
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/alignments/SRR8367773.actb.bam Desktop
+
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/alignments/SRR8367773.actb.bam.bai Desktop
+```
+
+#### 6. Open the BAM file with IGV. You should see coverage peaks as well as alignments.
+My data is paired-end so I colored alignments by first of pair strand. 
+![](/Users/noelawheeler/Downloads/igv_snapshot.png)
+
+#### 9. Observations about the alignments.
+The library appears to be stranded because we can see an unequal amount of forward/reverse stands. There are a fair amount of reads in the introns of this ACTB gene. There is less coverage in the beginning of the gene.
+
+#### Bonus
+
+#### 1. Include additional sample
+
+I included sample SRR8368061 which is a BP1 positive patient. 
+```{}
+samtools view -b SRR8368061.Aligned.sortedByCoord.out.bam chr7:5525148-5532601 > SRR8368061.actb.bam
+samtools index SRR8368061.actb.bam
+```
+
+```{}
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/alignments/SRR8368061.actb.bam Desktop
+
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/alignments/SRR8368061.actb.bam.bai Desktop
+```
+![](/Users/noelawheeler/Downloads/igv_snapshot_2samples.png)
+
+#### 2. Load the GTF you used to generate the STAR index.
+I downloaded my own GTF file but was not able to visualize alignments with it. 
+```{}
+cd /athena/angsd/scratch/naw4005
+cat hg38.ensGene.gtf | sort -S4G -k1,1 -k4,4n | bgzip -c > hg38.ensGene.sorted.gtf
+tabix hg38.ensGene.sorted.gtf
+```
+```{}
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/hg38.ensGene.sorted.gtf.tbi Desktop
+
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/hg38.ensGene.sorted.gtf Desktop
+```
+
+Download the files
+```{}
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/hg38.ensGene.sorted.gtf.gz Desktop
+
+scp naw4005@aphrodite.med.cornell.edu:/athena/angsd/scratch/naw4005/hg38.ensGene.sorted.gtf.gz Desktop
+```
+
+
+
