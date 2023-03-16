@@ -57,10 +57,13 @@ names(gene.vector) <- row.names(DGE.results)
 pwf <- nullp(gene.vector, "sacCer3", "ensGene")
 ```
 
-It appears that before a length of 2000 the bias is stable.  
+It appears that before a length of 2000 the bias is stable. 
+
 
 ### 2. What proportion of genes are below this length?
-About .47 of differentially expressed genes are below this length.
+```{r}
+length(which(pwf$pwf < .47)) / length(pwf$pwf)
+```
 
 ### 3. For each of the ontologies (BP, CC, and MF), list the top 5 most overrepresented GO terms in your DE genes.
 ```{r}

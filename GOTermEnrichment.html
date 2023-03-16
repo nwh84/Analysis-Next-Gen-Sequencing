@@ -406,8 +406,8 @@ pwf &lt;- nullp(gene.vector, &quot;sacCer3&quot;, &quot;ensGene&quot;)</code></p
 </div>
 <div id="what-proportion-of-genes-are-below-this-length" class="section level3">
 <h3>2. What proportion of genes are below this length?</h3>
-<p>About .47 of differentially expressed genes are below this
-length.</p>
+<pre class="r"><code>length(which(pwf$pwf &lt; .47)) / length(pwf$pwf)</code></pre>
+<pre><code>## [1] 0.8462381</code></pre>
 </div>
 <div id="for-each-of-the-ontologies-bp-cc-and-mf-list-the-top-5-most-overrepresented-go-terms-in-your-de-genes." class="section level3">
 <h3>3. For each of the ontologies (BP, CC, and MF), list the top 5 most
