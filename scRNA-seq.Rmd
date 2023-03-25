@@ -140,7 +140,7 @@ sce_compute_sum <- logNormCounts(sce_compute_sum)
 Yes, it shows expected behavior that is a linear correlation. 
 
 #### How can you access the normalized data matrix? 
-The normalized data matrix is stored in deconv_sf.
+We could access the normalized data matrix using 'counts(sce_compute_sum)' command. 
 
 #### What type of cells?
 ```{r, message=FALSE}
