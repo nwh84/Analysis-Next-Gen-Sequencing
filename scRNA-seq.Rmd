@@ -34,7 +34,9 @@ format(object.size(dense_matrix), units = "Mb")
 # BiocManager::install('SingleCellExperiment')
 library(SingleCellExperiment)
 sce <- SingleCellExperiment(assays = list(counts = sparse_matrix))
-# head(assay(sce, "counts"))
+
+options(width = 60, max.print = 20)
+head(assay(sce, "counts"))
 ```
 
 #### How many total UMIs were found in each of the first five cells?
@@ -95,7 +97,7 @@ plot(col_data$sum, main = "Total UMI Counts per Cell", xlab = "Cell", ylab = "UM
 plot(col_data$detected, main = "Total Expressed Genes per Cell", xlab = "Cell", ylab = "Expressed Genes")
 ```
 
-These plots show that some cells have a large number of expressed genes and UMIs. For total UMI this number decreases quickly and remains at or close to zero for most cells. For expressed genes it decreases slower and less than half the cells have expressed genes at or close to zero.
+These plots show that some cells have a large number of expressed genes and UMIs. For total UMI this number decreases quickly and remains at or close to zero for most cells. For expressed genes it decreases slower and less than half the cells have expressed genes at or close to zero. This means that most of the genes in cells are lowly expressed and that the expressed genes show different isoforms, which is what we expect to see. 
 
 #### Generate a plot for percent mitochondrial reads
 ```{r}
@@ -135,7 +137,7 @@ plot(sce_compute_sum$total, sizeFactors(sce_compute_sum))
 sce_compute_sum <- logNormCounts(sce_compute_sum)
 ```
 
-Yes, it shows expected behavior.
+Yes, it shows expected behavior that is a linear correlation. 
 
 #### How can you access the normalized data matrix? 
 The normalized data matrix is stored in deconv_sf.
