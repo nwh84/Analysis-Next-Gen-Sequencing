@@ -1,0 +1,157 @@
+---
+title: "scRNA-seq"
+author: "Noelle Wheeler"
+date: "2023-03-20"
+output: html_document
+---
+
+#### Read count matrix into R
+```{r}
+library(magrittr)
+library(readr)
+library(tibble)
+library(Matrix)
+load_counts_matrix <- function (file, FEATURE_COL="GENE", AS_SPARSE=TRUE) {
+    read_tsv(file) %>%
+        column_to_rownames(FEATURE_COL) %>%
+        as.matrix %>% Matrix(sparse=AS_SPARSE)
+}
+```
+
+```{r}
+sparse_matrix <- load_counts_matrix("WT-1.dge.txt")
+dense_matrix <- load_counts_matrix("WT-1.dge.txt", AS_SPARSE=FALSE)
+```
+
+#### Compare the sizes of the two
+```{r}
+format(object.size(sparse_matrix), units = "Mb")
+format(object.size(dense_matrix), units = "Mb")
+```
+
+#### Construct a SingleCellExperiment
+```{r, message=FALSE}
+# BiocManager::install('SingleCellExperiment')
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(assays = list(counts = sparse_matrix))
+# head(assay(sce, "counts"))
+```
+
+#### How many total UMIs were found in each of the first five cells?
+```{r}
+counts_matrix <- counts(sce)
+```
+
+```{r}
+# sum first five columns
+total_UMI <- c()
+for (i in seq(1:5)){
+  total_UMI <- append(total_UMI, sum(counts_matrix[,i]))
+}
+total_UMI
+```
+
+
+#### How many genes are detected in each of the first five cells?
+```{r}
+# find number of non-zero entries in first five columns
+num_genes <- c()
+for (i in seq(1:5)){
+  num_genes <- append(num_genes, sum(counts_matrix[,i] != 0))
+}
+num_genes
+```
+
+#### How many genes have non-zero counts in any of the first five cells?
+```{r}
+num_genes_first_five <- sum(counts_matrix[, seq(1:5)] != 0)
+num_genes_first_five
+```
+
+#### If you were to change the row- and column-names of the original matrix, how could you keep track of the original names?
+
+The original row- and column-names are stored in the rownames and colnames attributes. This can be accessed using 'rownames(sce)' and 'colnames(sce)'.
+
+#### Following the Quality Control chapter, add QC metrics to the SingleCellExperiment object
+```{r}
+# BiocManager::install(c('scuttle', 'scran', 'scater', 'uwot', 'rtracklayer'))
+library(scuttle)
+MT_names <- grep("^MT-", rownames(sce), value = T)
+is_mito <- rownames(sce) %in% MT_names
+# add qc metrics to current sce
+sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
+# head(sce_cell)
+colnames(colData(sce))
+# add qc metrics to new df called, df to use later
+df <- perCellQCMetrics(sce, subsets=list(Mito=is_mito))
+```
+
+#### Generate a plot of each (a) the total number of UMI counts per cell and (b) the total number of expressed genes per cell
+```{r}
+col_data <- colData(sce)
+# total number of UMI counts per cell
+plot(col_data$sum, main = "Total UMI Counts per Cell", xlab = "Cell", ylab = "UMI counts")
+# total number of expressed genes per cell
+plot(col_data$detected, main = "Total Expressed Genes per Cell", xlab = "Cell", ylab = "Expressed Genes")
+```
+
+These plots show that some cells have a large number of expressed genes and UMIs. For total UMI this number decreases quickly and remains at or close to zero for most cells. For expressed genes it decreases slower and less than half the cells have expressed genes at or close to zero.
+
+#### Generate a plot for percent mitochondrial reads
+```{r}
+plot(col_data$subsets_Mito_percent, main = "Percent Mitochondrial reads", xlab = "Cell", ylab = "% Mitochondrial Reads")
+```
+
+#### Decide on some threshold for either QC parameter and remove the corresponding cells
+```{r}
+# remove cells if they have a library size below 10,000
+qc.lib <- df$sum < 1e4
+discard <- qc.lib
+DataFrame(LibSize=sum(qc.lib))
+# identify cells that are outliers for the sum QC metric
+reasons <- perCellQCFilters(sce, 
+    sub.fields=c("sum"))
+colSums(as.matrix(reasons))
+summary(reasons$discard)
+
+# remove the low quality cells
+filtered <- sce[,!reasons$discard]
+```
+
+#### Normalize the counts via deconvolution
+```{r}
+library(scran)
+set.seed(100)
+clust <- quickCluster(filtered) 
+table(clust)
+deconv_sf <- calculateSumFactors(filtered, cluster=clust)
+summary(deconv_sf)
+```
+
+#### Do the size factors calculated by computeSumFactors show the expected behavior?
+```{r}
+sce_compute_sum <- computeSumFactors(filtered, cluster=clust, min.mean=0.1)
+plot(sce_compute_sum$total, sizeFactors(sce_compute_sum))
+sce_compute_sum <- logNormCounts(sce_compute_sum)
+```
+
+Yes, it shows expected behavior.
+
+#### How can you access the normalized data matrix? 
+The normalized data matrix is stored in deconv_sf.
+
+#### What type of cells?
+```{r, message=FALSE}
+# assign cell labels using reference data 
+# BiocManager::install('celldex')
+# BiocManager::install('SingleR')
+library(celldex)
+ref <- BlueprintEncodeData()
+ref
+
+library(SingleR)
+pred <- SingleR(test=sce_compute_sum, ref=ref, labels=ref$label.main)
+table(pred$labels)
+```
+
+It seems like these are kidney cells because Endothelial cells, Mesangial cells, and Epithelial cells, which are some of the most common cells, are found in the kidney.
