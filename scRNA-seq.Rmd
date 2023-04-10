@@ -147,12 +147,13 @@ We could access the normalized data matrix is added to sce_compute_sum as a new 
 # BiocManager::install('celldex')
 # BiocManager::install('SingleR')
 library(celldex)
-ref <- BlueprintEncodeData()
+library(SingleR)
+ref <- HumanPrimaryCellAtlasData()
+# ref <- BlueprintEncodeData()
 ref
 
-library(SingleR)
 pred <- SingleR(test=sce_compute_sum, ref=ref, labels=ref$label.main)
 table(pred$labels)
 ```
 
-It seems like these are kidney cells because Endothelial cells, Mesangial cells, and Epithelial cells, which are some of the most common cells, are found in the kidney.
+These appear to be embryonic stem cells.
