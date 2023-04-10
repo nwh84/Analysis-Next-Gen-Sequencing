@@ -66,8 +66,7 @@ num_genes
 
 #### How many genes have non-zero counts in any of the first five cells?
 ```{r}
-num_genes_first_five <- sum(counts_matrix[, seq(1:5)] != 0)
-num_genes_first_five
+sum(rowSums(counts(sce[,1:5])) > 0)
 ```
 
 #### If you were to change the row- and column-names of the original matrix, how could you keep track of the original names?
@@ -140,7 +139,7 @@ sce_compute_sum <- logNormCounts(sce_compute_sum)
 Yes, it shows expected behavior that is a linear correlation. 
 
 #### How can you access the normalized data matrix? 
-We could access the normalized data matrix using 'counts(sce_compute_sum)' command. 
+We could access the normalized data matrix is added to sce_compute_sum as a new assay called logcounts. The counts matrix can be found using logcounts(sce_compute_sum).
 
 #### What type of cells?
 ```{r, message=FALSE}
